@@ -49,6 +49,7 @@
       gap: 1rem;
       margin-bottom: 1.25rem;
       flex-wrap: wrap;
+      align-items: flex-start;
     }
 
     .title-block h1 {
@@ -74,6 +75,36 @@
       background: rgba(37,99,235,0.1);
       color: #bfdbfe;
       font-size: 0.75rem;
+      margin-top: 0.35rem;
+    }
+
+    .header-links {
+      display: flex;
+      gap: 0.4rem;
+      align-items: center;
+    }
+
+    .header-links a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle);
+      background: #020617;
+      color: var(--text-main);
+      text-decoration: none;
+    }
+
+    .header-links a:hover {
+      border-color: var(--accent);
+    }
+
+    .header-links svg {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
     }
 
     .input-card {
@@ -305,6 +336,29 @@
       color: #475569;
     }
 
+    .system-row {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      margin-top: 0.5rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    #systemPromptInput {
+      width: 100%;
+      min-height: 90px;
+      max-height: 200px;
+      resize: vertical;
+      padding: 0.4rem 0.6rem;
+      border-radius: 0.5rem;
+      border: 1px solid var(--border-subtle);
+      background: #020617;
+      color: var(--text-main);
+      font-size: 0.8rem;
+      font-family: var(--font);
+    }
+
     .chat-log {
       border-radius: 0.6rem;
       border: 1px solid var(--border-subtle);
@@ -364,6 +418,22 @@
       font-family: var(--font);
     }
 
+    .gh-inline-link {
+      display: inline-flex;
+      align-items: center;
+      margin-left: 0.4rem;
+      text-decoration: none;
+      color: var(--accent);
+      font-size: 0.8rem;
+    }
+
+    .gh-inline-link svg {
+      width: 14px;
+      height: 14px;
+      fill: currentColor;
+      margin-left: 2px;
+    }
+
     footer {
       margin-top: 1.25rem;
       font-size: 0.75rem;
@@ -398,13 +468,39 @@
           let the chat pick and call your MCP tools over HTTP (developer-only).
         </p>
         <p class="subtitle">
-          You can also try my sample MCP server to see how this tool works. Paste this URL below:
-          <code>https://mcp-sample-server-js.onrender.com/.well-known/mcp.json</code> and click
-          “Discover tools”. The sample server runs on a free tier and can take up to ~90 seconds to
-          wake up after inactivity, so wait 1–2 minutes between attempts if it’s cold. Once tools
-          are loaded, paste your OpenAI API key and try a prompt like
-          <code>What is the sum of 1 and 2?</code>.
+          You can also try my sample MCP server to see how this tool works. Paste
+          <a href="https://mcp-sample-server-js.onrender.com/.well-known/mcp.json" target="_blank" rel="noopener noreferrer" style="text-decoration:none;">
+            <code>https://mcp-sample-server-js.onrender.com/.well-known/mcp.json</code>
+          </a>
+          below and click “Discover tools”. The sample server runs on a free tier and can take up to ~90 seconds to
+          wake up after inactivity, so wait 1–2 minutes between attempts if it’s cold. Once tools are loaded, paste your
+          OpenAI API key and try a prompt like <code>What is the sum of 1 and 2?</code>.
+          <a class="gh-inline-link" href="https://github.com/aruneshmishra/mcp-sample-server-js" target="_blank" rel="noopener noreferrer">
+            server repo
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38
+              0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52
+              -.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95
+              0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82A7.62 7.62 0 0 1 8 3.47c.68.003 1.37.092
+              2.01.27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15
+              0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2
+              0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"></path>
+            </svg>
+          </a>
         </p>
+      </div>
+      <div class="header-links">
+        <a href="https://github.com/aruneshmishra/mcp-explorer" target="_blank" rel="noopener noreferrer" title="Open MCP Explorer client repo">
+          <svg viewBox="0 0 16 16" aria-hidden="true">
+            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38
+            0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52
+            -.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95
+            0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82A7.62 7.62 0 0 1 8 3.47c.68.003 1.37.092
+            2.01.27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15
+            0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2
+            0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"></path>
+          </svg>
+        </a>
       </div>
     </header>
 
@@ -441,7 +537,7 @@
           <h2><span class="dot"></span> Chat with your MCP server (OpenAI)</h2>
           <small>
             Developer-only. Your OpenAI key is used from this page to:
-            (1) read the manifest, (2) choose a tool + arguments, (3) call
+            (1) read the manifest, (2) plan one or more tool calls with arguments, (3) call
             <code>POST /mcp/tools/{toolName}</code>. The key is not stored,
             but is visible in your browser’s network inspector. For production, use a backend.
           </small>
@@ -459,9 +555,40 @@
               </button>
             </div>
 
+            <div class="system-row">
+              <span>System prompt for tool planning (editable):</span>
+              <textarea id="systemPromptInput">
+You are an assistant that plans calls to an MCP-like HTTP API for tools.
+
+You are given:
+- An MCP manifest (with tools in manifest.tools[].name and input_schema)
+- A user question
+
+HTTP contract (handled by the client UI):
+- POST BASE_URL/mcp/tools/{toolName}
+- Body: { "args": { ... } }
+- Response: { "result": ... }
+
+Your job:
+- Decide which tool or tools to call (one or more, in order)
+- Build args objects that match the tool input_schema
+- Keep calls simple, safe, and idempotent when possible
+
+Response format:
+Return ONLY valid JSON (no extra prose) using this shape:
+
+{
+  "calls": [
+    { "tool": "tool_name_here", "args": { /* your args */ } }
+  ],
+  "explanation": "Short natural-language summary of what you are going to do."
+}
+              </textarea>
+            </div>
+
             <div class="hint">
-              Example: once tools are loaded, try <code>What is the sum of 1 and 2?</code> and the
-              assistant should select the appropriate tool and call your MCP server.
+              The assistant will read the manifest and this system prompt, decide which tool(s) to call,
+              construct arguments, and execute them through your MCP server.
             </div>
 
             <div id="chatLog" class="chat-log"></div>
@@ -498,6 +625,7 @@
 
     const apiKeyInput = document.getElementById('apiKeyInput');
     const clearKeyBtn = document.getElementById('clearKeyBtn');
+    const systemPromptInput = document.getElementById('systemPromptInput');
     const chatLogEl = document.getElementById('chatLog');
     const chatInput = document.getElementById('chatInput');
     const sendChatBtn = document.getElementById('sendChatBtn');
@@ -683,7 +811,7 @@
 
         chatHistory = [{
           role: 'assistant',
-          content: 'Manifest loaded. Ask your question, e.g. something that can be answered by one of the tools.'
+          content: 'Manifest loaded. Ask a question and I will try to plan one or more MCP tool calls.'
         }];
         renderChatLog();
         setChatStatus('');
@@ -781,24 +909,22 @@
       renderChatLog();
 
       sendChatBtn.disabled = true;
-      setChatStatus('Asking OpenAI to pick a tool and arguments...', false);
+      setChatStatus('Asking OpenAI to plan tool call(s)...', false);
 
       try {
-        // Step 1: Ask OpenAI which tool to call + args
+        const systemPromptText = systemPromptInput.value.trim() || '';
+
+        // Step 1: Ask OpenAI which tool(s) to call + args
         const planningMessages = [
           {
             role: 'system',
+            content: systemPromptText
+          },
+          {
+            role: 'system',
             content:
-              'You are an assistant that plans calls to an MCP-like HTTP API for tools.\n' +
-              'You are given an MCP manifest and a user question.\n' +
-              'Tools are described in manifest.tools[].name and input_schema.\n' +
-              'The HTTP contract is:\n' +
-              'POST ' + mcpBaseUrl + '/mcp/tools/{toolName}\n' +
-              'Body: { "args": { ... } }\n' +
-              'Response: { "result": ... }.\n\n' +
-              'Your job: Choose exactly ONE tool, construct an appropriate args object, and explain briefly.\n' +
-              'IMPORTANT: Respond ONLY with valid JSON in this shape:\n' +
-              '{ "tool": "tool_name_here", "args": { ... }, "explanation": "short text" }'
+              'The MCP server base URL is: ' + mcpBaseUrl + '\n' +
+              'The client will call POST ' + mcpBaseUrl + '/mcp/tools/{toolName} with body { "args": { ... } }.'
           },
           {
             role: 'system',
@@ -835,52 +961,71 @@
         const planText = planData.choices?.[0]?.message?.content || '';
         const planJson = extractJsonFromText(planText);
 
-        if (!planJson || !planJson.tool) {
-          setChatStatus('Could not parse tool/args JSON from OpenAI response.', true);
+        let calls = [];
+        if (planJson && Array.isArray(planJson.calls) && planJson.calls.length > 0) {
+          calls = planJson.calls;
+        } else if (planJson && planJson.tool) {
+          calls = [{ tool: planJson.tool, args: planJson.args || {} }];
+        }
+
+        if (!calls.length) {
+          setChatStatus('Could not find any calls in OpenAI response (expected "calls" array or "tool").', true);
           sendChatBtn.disabled = false;
           return;
         }
 
-        const toolName = planJson.tool;
-        const toolArgs = planJson.args || {};
-        const explanation = planJson.explanation || 'Calling ' + toolName;
+        const explanation = planJson.explanation || 'Executing planned MCP tool call(s).';
 
-        // Step 2: Call MCP tool HTTP endpoint
-        setChatStatus('Calling MCP tool "' + toolName + '" on ' + mcpBaseUrl + ' ...', false);
+        // Step 2: Call MCP tool HTTP endpoint(s)
+        let resultsText = '';
+        for (let i = 0; i < calls.length; i++) {
+          const c = calls[i];
+          const toolName = c.tool;
+          const toolArgs = c.args || {};
 
-        const toolResp = await fetch(mcpBaseUrl + '/mcp/tools/' + encodeURIComponent(toolName), {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ args: toolArgs })
-        });
+          if (!toolName) {
+            resultsText += `\nCall #${i + 1}: missing "tool" name.\n`;
+            continue;
+          }
 
-        if (!toolResp.ok) {
-          const txt = await toolResp.text().catch(() => '');
-          console.error('MCP tool error:', txt);
-          setChatStatus('MCP tool call failed with status ' + toolResp.status + '\n' + txt, true);
-          chatHistory.push({
-            role: 'assistant',
-            content: 'I tried to call tool "' + toolName + '" but got HTTP ' + toolResp.status + '.'
-          });
-          renderChatLog();
-          sendChatBtn.disabled = false;
-          return;
+          setChatStatus(`Calling MCP tool "${toolName}" on ${mcpBaseUrl} ...`, false);
+
+          try {
+            const toolResp = await fetch(mcpBaseUrl + '/mcp/tools/' + encodeURIComponent(toolName), {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ args: toolArgs })
+            });
+
+            if (!toolResp.ok) {
+              const txt = await toolResp.text().catch(() => '');
+              console.error('MCP tool error:', txt);
+              resultsText += `\nCall #${i + 1} - tool "${toolName}" failed with HTTP ${toolResp.status}.\n${txt}\n`;
+              continue;
+            }
+
+            const toolData = await toolResp.json();
+            const resultSnippet =
+              typeof toolData.result === 'undefined'
+                ? JSON.stringify(toolData, null, 2)
+                : JSON.stringify(toolData.result, null, 2);
+
+            resultsText +=
+              `\nCall #${i + 1} - tool: ${toolName}\n` +
+              `Args: ${JSON.stringify(toolArgs)}\n` +
+              `Result:\n${resultSnippet}\n`;
+          } catch (toolErr) {
+            console.error('MCP tool call error:', toolErr);
+            resultsText += `\nCall #${i + 1} - error calling "${toolName}": ${toolErr.message}\n`;
+          }
         }
-
-        const toolData = await toolResp.json();
-
-        const resultSnippet =
-          typeof toolData.result === 'undefined'
-            ? JSON.stringify(toolData, null, 2)
-            : JSON.stringify(toolData.result, null, 2);
 
         const answerText =
           explanation +
-          '\n\nTool: ' + toolName +
-          '\nArgs: ' + JSON.stringify(toolArgs) +
-          '\nResult:\n' + resultSnippet;
+          '\n' +
+          resultsText.trim();
 
         chatHistory.push({ role: 'assistant', content: answerText });
         renderChatLog();
@@ -888,7 +1033,7 @@
 
       } catch (err) {
         console.error(err);
-        setChatStatus('Error while planning or calling MCP tool: ' + err.message, true);
+        setChatStatus('Error while planning or calling MCP tool(s): ' + err.message, true);
       } finally {
         sendChatBtn.disabled = false;
       }

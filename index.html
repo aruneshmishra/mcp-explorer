@@ -61,7 +61,7 @@
       margin-top: 0.25rem;
       font-size: 0.9rem;
       color: var(--text-muted);
-      max-width: 32rem;
+      max-width: 36rem;
     }
 
     .badge {
@@ -152,6 +152,7 @@
       margin-top: 0.6rem;
       font-size: 0.8rem;
       color: var(--text-muted);
+      white-space: pre-wrap;
     }
 
     .status.error {
@@ -358,7 +359,7 @@
       border-radius: 0.5rem;
       border: 1px solid var(--border-subtle);
       background: #020617;
-      color: var(--text-main);
+      color: #e5e7eb;
       font-size: 0.85rem;
       font-family: var(--font);
     }
@@ -395,6 +396,14 @@
         <p class="subtitle">
           Paste an MCP manifest URL to see its tools. Optionally, use your own OpenAI API key to
           let the chat pick and call your MCP tools over HTTP (developer-only).
+        </p>
+        <p class="subtitle">
+          You can also try my sample MCP server to see how this tool works. Paste this URL below:
+          <code>https://mcp-sample-server-js.onrender.com/.well-known/mcp.json</code> and click
+          “Discover tools”. The sample server runs on a free tier and can take up to ~90 seconds to
+          wake up after inactivity, so wait 1–2 minutes between attempts if it’s cold. Once tools
+          are loaded, paste your OpenAI API key and try a prompt like
+          <code>What is the sum of 1 and 2?</code>.
         </p>
       </div>
     </header>
@@ -451,14 +460,14 @@
             </div>
 
             <div class="hint">
-              Example prompt: <code>What is the sum of 1 and 2?</code> — the assistant should pick
-              the appropriate tool (like <code>sum</code>), construct args, call your MCP endpoint, and reply with the result.
+              Example: once tools are loaded, try <code>What is the sum of 1 and 2?</code> and the
+              assistant should select the appropriate tool and call your MCP server.
             </div>
 
             <div id="chatLog" class="chat-log"></div>
 
             <div class="chat-input-row">
-              <textarea id="chatInput" placeholder="Ask: What is the sum of 1 and 2?"></textarea>
+              <textarea id="chatInput" placeholder=""></textarea>
               <button id="sendChatBtn" type="button">Send</button>
             </div>
 
@@ -644,7 +653,8 @@
         });
 
         if (!resp.ok) {
-          setStatus(`Request failed with status ${resp.status} ${resp.statusText}`, true);
+          const txt = await resp.text().catch(() => '');
+          setStatus(`Request failed with status ${resp.status} ${resp.statusText}\n${txt}`, true);
           discoverBtn.disabled = false;
           return;
         }
@@ -673,18 +683,14 @@
 
         chatHistory = [{
           role: 'assistant',
-          content: 'Manifest loaded. Ask me something like "What is the sum of 1 and 2?" and I will choose a tool, call your MCP server, and reply with the result.'
+          content: 'Manifest loaded. Ask your question, e.g. something that can be answered by one of the tools.'
         }];
         renderChatLog();
         setChatStatus('');
 
       } catch (err) {
         console.error(err);
-        if (err.name === 'TypeError') {
-          setStatus('Request failed. Check the URL, HTTPS, and CORS settings on the MCP host.', true);
-        } else {
-          setStatus('Unexpected error: ' + err.message, true);
-        }
+        setStatus('Unexpected error: ' + err.message, true);
       } finally {
         discoverBtn.disabled = false;
       }
@@ -727,20 +733,30 @@
       if (direct) return direct;
 
       // Try to find a ```json ``` block
-      const match = text.match(/```json\\s*([\\s\\S]*?)```/i);
+      const match = text.match(/```json\s*([\s\S]*?)```/i);
       if (match && match[1]) {
         const block = safeJsonParse(match[1].trim());
         if (block) return block;
       }
 
       // Try any ``` ``` block
-      const match2 = text.match(/```[a-zA-Z0-9]*\\s*([\\s\\S]*?)```/);
+      const match2 = text.match(/```[a-zA-Z0-9]*\s*([\s\S]*?)```/);
       if (match2 && match2[1]) {
         const block2 = safeJsonParse(match2[1].trim());
         if (block2) return block2;
       }
 
       return null;
+    }
+
+    function setChatErrorWithBody(status, bodyText) {
+      const trimmed = bodyText && bodyText.length > 800
+        ? bodyText.slice(0, 800) + '\n…(truncated)…'
+        : bodyText;
+      setChatStatus(
+        `OpenAI planning error ${status}.\nRaw response:\n${trimmed || '(no body)'}`,
+        true
+      );
     }
 
     async function sendChat() {
@@ -808,9 +824,9 @@
         });
 
         if (!planResp.ok) {
-          const txt = await planResp.text();
+          const txt = await planResp.text().catch(() => '');
           console.error('OpenAI planning error:', txt);
-          setChatStatus('OpenAI planning error: ' + planResp.status, true);
+          setChatErrorWithBody(planResp.status, txt);
           sendChatBtn.disabled = false;
           return;
         }
@@ -841,9 +857,9 @@
         });
 
         if (!toolResp.ok) {
-          const txt = await toolResp.text();
+          const txt = await toolResp.text().catch(() => '');
           console.error('MCP tool error:', txt);
-          setChatStatus('MCP tool call failed with status ' + toolResp.status, true);
+          setChatStatus('MCP tool call failed with status ' + toolResp.status + '\n' + txt, true);
           chatHistory.push({
             role: 'assistant',
             content: 'I tried to call tool "' + toolName + '" but got HTTP ' + toolResp.status + '.'
@@ -860,7 +876,6 @@
             ? JSON.stringify(toolData, null, 2)
             : JSON.stringify(toolData.result, null, 2);
 
-        // Step 3: Summarize result (optional second call) OR inline explanation
         const answerText =
           explanation +
           '\n\nTool: ' + toolName +

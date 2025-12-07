@@ -181,6 +181,11 @@
       cursor: pointer;
     }
 
+    .copy-btn.small {
+      width: 22px;
+      height: 22px;
+    }
+
     .copy-btn:hover {
       border-color: var(--accent);
     }
@@ -459,6 +464,26 @@
       margin-left: 2px;
     }
 
+    .prompt-examples {
+      margin-top: 0.35rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .prompt-line {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.25rem;
+      margin-top: 0.15rem;
+    }
+
+    .prompt-label {
+      font-weight: 500;
+      color: #cbd5f5;
+      margin-right: 0.25rem;
+    }
+
     footer {
       margin-top: 1.25rem;
       font-size: 0.75rem;
@@ -501,6 +526,7 @@
             type="button"
             class="copy-btn"
             data-copy="https://mcp-sample-server-js.onrender.com/.well-known/mcp.json"
+            data-msg="Server manifest URL copied to clipboard."
             title="Copy server manifest URL"
           >
             <svg viewBox="0 0 16 16" aria-hidden="true">
@@ -509,8 +535,7 @@
             </svg>
           </button>
           below and click “Discover tools”. The sample server runs on a free tier and can take up to ~90 seconds to
-          wake up after inactivity, so wait 1–2 minutes between attempts if it’s cold. Once tools are loaded, paste your
-          OpenAI API key and try a prompt like <code>What is the sum of 1 and 2?</code>.
+          wake up after inactivity, so wait 1–2 minutes between attempts if it’s cold.
           <a class="gh-inline-link" href="https://github.com/aruneshmishra/mcp-sample-server-js" target="_blank" rel="noopener noreferrer">
             server repo
             <svg viewBox="0 0 16 16" aria-hidden="true">
@@ -524,6 +549,41 @@
             </svg>
           </a>
         </p>
+        <div class="prompt-examples">
+          <div>Once tools are loaded and your OpenAI key is set, try:</div>
+          <div class="prompt-line">
+            <span class="prompt-label">Single tool:</span>
+            <code>What is the sum of 1 and 2?</code>
+            <button
+              type="button"
+              class="copy-btn small"
+              data-copy="What is the sum of 1 and 2?"
+              data-msg="Single-tool prompt copied."
+              title="Copy single-tool prompt"
+            >
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M4 2.5A1.5 1.5 0 0 1 5.5 1h6A1.5 1.5 0 0 1 13 2.5v7A1.5 1.5 0 0 1 11.5 11h-6A1.5 1.5 0 0 1 4 9.5v-7Zm1.5-.5a.5.5 0 0 0-.5.5v7a.5.5 0 0 0 .5.5h6a.5.5 0 0 0 .5-.5v-7a.5.5 0 0 0-.5-.5h-6Z"/>
+                <path d="M2.5 5A1.5 1.5 0 0 1 4 3.5v7A1.5 1.5 0 0 0 5.5 12H11a1.5 1.5 0 0 1-1.5 1.5h-6A1.5 1.5 0 0 1 2 12V5.5A.5.5 0 0 1 2.5 5Z"/>
+              </svg>
+            </button>
+          </div>
+          <div class="prompt-line">
+            <span class="prompt-label">Multiple tools:</span>
+            <code>What time did you add 10,20 and 70</code>
+            <button
+              type="button"
+              class="copy-btn small"
+              data-copy="What time did you add 10,20 and 70"
+              data-msg="Multi-tool prompt copied."
+              title="Copy multi-tool prompt"
+            >
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M4 2.5A1.5 1.5 0 0 1 5.5 1h6A1.5 1.5 0 0 1 13 2.5v7A1.5 1.5 0 0 1 11.5 11h-6A1.5 1.5 0 0 1 4 9.5v-7Zm1.5-.5a.5.5 0 0 0-.5.5v7a.5.5 0 0 0 .5.5h6a.5.5 0 0 0 .5-.5v-7a.5.5 0 0 0-.5-.5h-6Z"/>
+                <path d="M2.5 5A1.5 1.5 0 0 1 4 3.5v7A1.5 1.5 0 0 0 5.5 12H11a1.5 1.5 0 0 1-1.5 1.5h-6A1.5 1.5 0 0 1 2 12V5.5A.5.5 0 0 1 2.5 5Z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
       </div>
       <div class="header-links">
         <a href="https://github.com/aruneshmishra/mcp-explorer" target="_blank" rel="noopener noreferrer" title="Open MCP Explorer client repo">
@@ -1093,10 +1153,11 @@ Return ONLY valid JSON (no extra prose) using this shape:
       buttons.forEach(btn => {
         btn.addEventListener('click', async () => {
           const text = btn.getAttribute('data-copy') || '';
+          const msg = btn.getAttribute('data-msg') || 'Copied to clipboard.';
           if (!text) return;
           try {
             await navigator.clipboard.writeText(text);
-            setStatus('Server manifest URL copied to clipboard.', false);
+            setStatus(msg, false);
           } catch (err) {
             console.error('Clipboard error:', err);
             setStatus('Unable to copy to clipboard in this browser.', true);

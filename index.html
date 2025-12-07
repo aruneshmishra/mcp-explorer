@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>MCP Tool Explorer – Discover Your MCP Tools</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Simple browser-based MCP explorer. Paste an MCP manifest URL and inspect tools, resources, models, and raw JSON." />
+
+  <style>
+    :root {
+      --bg: #020617;
+      --bg-card: #020617;
+      --bg-alt: #020617;
+      --border-subtle: #1e293b;
+      --accent: #3b82f6;
+      --accent-soft: #1d283a;
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+      --danger: #f97373;
+      --font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 1.5rem;
+      background: radial-gradient(circle at top, #1e293b 0, #020617 50%, #000 100%);
+      color: var(--text-main);
+      font-family: var(--font);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 960px;
+      border-radius: 1rem;
+      border: 1px solid var(--border-subtle);
+      background: radial-gradient(circle at top left, #0f172a 0, #020617 50%, #020617 100%);
+      padding: 1.5rem;
+      box-shadow: 0 18px 40px rgba(0,0,0,0.75);
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .title-block h1 {
+      margin: 0;
+      font-size: 1.7rem;
+      letter-spacing: 0.02em;
+    }
+
+    .subtitle {
+      margin-top: 0.25rem;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.15rem 0.6rem;
+      border-radius: 999px;
+      border: 1px solid rgba(59,130,246,0.4);
+      background: rgba(37,99,235,0.1);
+      color: #bfdbfe;
+      font-size: 0.75rem;
+    }
+
+    .input-card {
+      background: var(--bg-card);
+      border-radius: 0.75rem;
+      border: 1px solid var(--border-subtle);
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      margin-bottom: 0.35rem;
+      color: var(--text-muted);
+    }
+
+    .url-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    #mcpUrl {
+      flex: 1;
+      min-width: 200px;
+      padding: 0.55rem 0.7rem;
+      border-radius: 0.5rem;
+      border: 1px solid var(--border-subtle);
+      background: #020617;
+      color: var(--text-main);
+      font-size: 0.9rem;
+    }
+
+    #mcpUrl::placeholder {
+      color: #475569;
+    }
+
+    button {
+      border-radius: 999px;
+      border: none;
+      padding: 0.55rem 1.1rem;
+      cursor: pointer;
+      background: var(--accent);
+      color: #e5e7eb;
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      white-space: nowrap;
+    }
+
+    button:hover {
+      background: #2563eb;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .hint {
+      margin-top: 0.5rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .hint code {
+      background: var(--accent-soft);
+      padding: 0.05rem 0.35rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+    }
+
+    .status {
+      margin-top: 0.6rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .status.error {
+      color: var(--danger);
+    }
+
+    .results-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 2.2fr) minmax(0, 1.8fr);
+      gap: 1rem;
+      margin-top: 0.75rem;
+    }
+
+    @media (max-width: 800px) {
+      .results-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .section {
+      background: var(--bg-card);
+      border-radius: 0.75rem;
+      border: 1px solid var(--border-subtle);
+      padding: 0.9rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .section h2 {
+      margin: 0 0 0.45rem 0;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .section h2 span.dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--accent);
+      display: inline-block;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.1rem 0.5rem;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .tool-card {
+      border-radius: 0.6rem;
+      border: 1px solid var(--border-subtle);
+      padding: 0.6rem 0.7rem;
+      margin-bottom: 0.6rem;
+      background: radial-gradient(circle at top left, rgba(37,99,235,0.18) 0, transparent 40%);
+    }
+
+    .tool-name {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 0.2rem;
+    }
+
+    .tool-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 0.3rem;
+    }
+
+    details {
+      margin-top: 0.25rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    details summary {
+      cursor: pointer;
+      list-style: none;
+    }
+
+    details summary::-webkit-details-marker {
+      display: none;
+    }
+
+    details summary::before {
+      content: "▶ ";
+      font-size: 0.7rem;
+    }
+
+    details[open] summary::before {
+      content: "▼ ";
+    }
+
+    pre {
+      background: #020617;
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-size: 0.75rem;
+      line-height: 1.4;
+      border: 1px solid var(--border-subtle);
+      margin-top: 0.35rem;
+      color: #e5e7eb;
+    }
+
+    .raw-json {
+      max-height: 420px;
+      overflow: auto;
+    }
+
+    footer {
+      margin-top: 1.25rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="title-block">
+        <h1>MCP Tool Explorer</h1>
+        <div class="badge">
+          <span>🔎</span>
+          <span>Paste MCP URL · Inspect tools</span>
+        </div>
+        <p class="subtitle">
+          For developers: give it an MCP manifest / discovery URL that returns JSON,
+          and this page will surface tools, resources, models, and the raw payload.
+        </p>
+      </div>
+    </header>
+
+    <div class="input-card">
+      <label for="mcpUrl">MCP manifest / discovery URL</label>
+      <div class="url-row">
+        <input
+          id="mcpUrl"
+          type="url"
+          placeholder="https://your-mcp-host/.well-known/mcp.json"
+        />
+        <button id="discoverBtn" type="button">Discover tools</button>
+      </div>
+      <div class="hint">
+        The URL should respond with JSON describing your MCP server. This tool runs entirely in your browser.
+        The MCP endpoint must allow cross-origin requests (<code>Access-Control-Allow-Origin</code>).
+      </div>
+      <div id="status" class="status"></div>
+    </div>
+
+    <div class="results-grid">
+      <div>
+        <div id="toolsSection" class="section" style="display:none;"></div>
+        <div id="otherSection" class="section" style="display:none;"></div>
+      </div>
+      <div>
+        <div id="rawSection" class="section" style="display:none;"></div>
+      </div>
+    </div>
+
+    <footer>
+      <div>
+        Built as a simple client-side helper for MCP developers.
+      </div>
+      <div>
+        By <a href="https://aruneshmishra.github.io" target="_blank" rel="noopener noreferrer">Arunesh Mishra</a>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    const urlInput = document.getElementById('mcpUrl');
+    const discoverBtn = document.getElementById('discoverBtn');
+    const statusEl = document.getElementById('status');
+
+    const toolsSection = document.getElementById('toolsSection');
+    const otherSection = document.getElementById('otherSection');
+    const rawSection = document.getElementById('rawSection');
+
+    function setStatus(msg, isError = false) {
+      statusEl.textContent = msg || '';
+      statusEl.className = 'status' + (isError ? ' error' : '');
+    }
+
+    function clearSections() {
+      toolsSection.style.display = 'none';
+      toolsSection.innerHTML = '';
+      otherSection.style.display = 'none';
+      otherSection.innerHTML = '';
+      rawSection.style.display = 'none';
+      rawSection.innerHTML = '';
+    }
+
+    function renderTools(tools) {
+      if (!Array.isArray(tools) || tools.length === 0) return;
+
+      toolsSection.style.display = 'block';
+      toolsSection.innerHTML = '';
+
+      const header = document.createElement('h2');
+      header.innerHTML = '<span class="dot"></span> Tools';
+      toolsSection.appendChild(header);
+
+      const pill = document.createElement('div');
+      pill.className = 'pill';
+      pill.textContent = tools.length + ' tool' + (tools.length === 1 ? '' : 's') + ' found';
+      toolsSection.appendChild(pill);
+
+      tools.forEach((tool, idx) => {
+        const card = document.createElement('div');
+        card.className = 'tool-card';
+
+        const name = document.createElement('div');
+        name.className = 'tool-name';
+        name.textContent = tool.name || '(unnamed tool #' + (idx+1) + ')';
+
+        const desc = document.createElement('div');
+        desc.className = 'tool-desc';
+        desc.textContent = tool.description || 'No description';
+
+        card.appendChild(name);
+        card.appendChild(desc);
+
+        const detailsEl = document.createElement('details');
+        const summary = document.createElement('summary');
+        summary.textContent = 'View full JSON for this tool';
+        detailsEl.appendChild(summary);
+
+        const pre = document.createElement('pre');
+        pre.textContent = JSON.stringify(tool, null, 2);
+        detailsEl.appendChild(pre);
+
+        card.appendChild(detailsEl);
+        toolsSection.appendChild(card);
+      });
+    }
+
+    function renderOtherSections(data) {
+      const sections = ['resources', 'models', 'actions'];
+      let hasAny = false;
+
+      otherSection.innerHTML = '';
+
+      sections.forEach(key => {
+        const value = data && data[key];
+        if (!value) return;
+
+        hasAny = true;
+        const sectionDiv = document.createElement('div');
+        sectionDiv.style.marginBottom = '0.75rem';
+
+        const title = document.createElement('h2');
+        title.innerHTML = '<span class="dot"></span> ' + key.charAt(0).toUpperCase() + key.slice(1);
+        sectionDiv.appendChild(title);
+
+        const pill = document.createElement('div');
+        pill.className = 'pill';
+
+        if (Array.isArray(value)) {
+          pill.textContent = value.length + ' ' + key;
+        } else if (typeof value === 'object') {
+          pill.textContent = key + ' object';
+        } else {
+          pill.textContent = key;
+        }
+        sectionDiv.appendChild(pill);
+
+        const detailsEl = document.createElement('details');
+        const summary = document.createElement('summary');
+        summary.textContent = 'View ' + key + ' JSON';
+        detailsEl.appendChild(summary);
+
+        const pre = document.createElement('pre');
+        pre.textContent = JSON.stringify(value, null, 2);
+        detailsEl.appendChild(pre);
+
+        sectionDiv.appendChild(detailsEl);
+        otherSection.appendChild(sectionDiv);
+      });
+
+      if (hasAny) {
+        otherSection.style.display = 'block';
+      } else {
+        otherSection.style.display = 'none';
+      }
+    }
+
+    function renderRaw(data) {
+      rawSection.style.display = 'block';
+      rawSection.innerHTML = '';
+
+      const header = document.createElement('h2');
+      header.innerHTML = '<span class="dot"></span> Raw JSON';
+      rawSection.appendChild(header);
+
+      const pre = document.createElement('pre');
+      pre.className = 'raw-json';
+      pre.textContent = JSON.stringify(data, null, 2);
+      rawSection.appendChild(pre);
+    }
+
+    async function discover() {
+      const url = urlInput.value.trim();
+      if (!url) {
+        setStatus('Please enter an MCP URL first.', true);
+        return;
+      }
+
+      clearSections();
+      setStatus('Fetching MCP manifest...', false);
+      discoverBtn.disabled = true;
+
+      try {
+        const resp = await fetch(url, {
+          method: 'GET',
+          headers: { 'Accept': 'application/json' }
+        });
+
+        if (!resp.ok) {
+          setStatus(`Request failed with status ${resp.status} ${resp.statusText}`, true);
+          discoverBtn.disabled = false;
+          return;
+        }
+
+        const data = await resp.json();
+        setStatus('MCP manifest loaded.', false);
+
+        // tools
+        if (Array.isArray(data.tools)) {
+          renderTools(data.tools);
+        } else {
+          toolsSection.style.display = 'block';
+          toolsSection.innerHTML = `
+            <h2><span class="dot"></span> Tools</h2>
+            <div class="pill">No <code>tools</code> array found in response</div>
+          `;
+        }
+
+        // resources/models/actions/etc
+        renderOtherSections(data);
+
+        // raw JSON
+        renderRaw(data);
+
+      } catch (err) {
+        console.error(err);
+        if (err.name === 'TypeError') {
+          setStatus('Request failed. Check the URL, HTTPS, and CORS settings on the MCP host.', true);
+        } else {
+          setStatus('Unexpected error: ' + err.message, true);
+        }
+      } finally {
+        discoverBtn.disabled = false;
+      }
+    }
+
+    discoverBtn.addEventListener('click', discover);
+
+    urlInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        discover();
+      }
+    });
+  </script>
+</body>
+</html>

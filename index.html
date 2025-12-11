@@ -623,12 +623,11 @@
       <div>
         <div id="toolsSection" class="section" style="display:none;"></div>
         <div id="otherSection" class="section" style="display:none;"></div>
+        <div id="rawSection" class="section" style="display:none;"></div>
       </div>
 
       <!-- Right: raw JSON + chat -->
       <div>
-        <div id="rawSection" class="section" style="display:none;"></div>
-
         <div id="chatSection" class="section chat-card">
           <h2><span class="dot"></span> Chat with your MCP server (OpenAI)</h2>
           <small>
@@ -646,6 +645,14 @@
                 type="password"
                 placeholder="sk-..."
               />
+              <select
+                id="modelSelect"
+                style="min-width:150px; padding:0.45rem 0.55rem; border-radius:0.5rem; border:1px solid var(--border-subtle); background:#020617; color:var(--text-main); font-size:0.85rem;"
+              >
+                <option value="gpt-4.1-mini" selected>gpt-4.1-mini (default)</option>
+                <option value="gpt-4.1">gpt-4.1</option>
+                <option value="gpt-4o-mini">gpt-4o-mini</option>
+              </select>
               <button id="clearKeyBtn" type="button" style="background:#0f172a; border:1px solid var(--border-subtle); font-size:0.8rem;">
                 Clear key
               </button>
@@ -720,6 +727,7 @@ Return ONLY valid JSON (no extra prose) using this shape:
     const rawSection = document.getElementById('rawSection');
 
     const apiKeyInput = document.getElementById('apiKeyInput');
+    const modelSelect = document.getElementById('modelSelect');
     const clearKeyBtn = document.getElementById('clearKeyBtn');
     const systemPromptInput = document.getElementById('systemPromptInput');
     const chatLogEl = document.getElementById('chatLog');
@@ -1039,7 +1047,7 @@ Return ONLY valid JSON (no extra prose) using this shape:
             'Authorization': 'Bearer ' + apiKey
           },
           body: JSON.stringify({
-            model: 'gpt-4.1-mini',
+            model: modelSelect?.value || 'gpt-4.1-mini',
             messages: planningMessages,
             temperature: 0.1
           })

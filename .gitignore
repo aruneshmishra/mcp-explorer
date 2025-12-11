@@ -1,2 +1,5 @@
 # No build files for this repo, it's static HTML.
 # Keep empty unless you add tooling later.
+
+# macOS Finder noise
+.DS_Store

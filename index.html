@@ -5,504 +5,7 @@
   <title>MCP Tool Explorer + Tool Chat (Dev)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="MCP Explorer for developers. Paste an MCP manifest URL to inspect tools and chat with your MCP server using OpenAI to pick and call tools (developer-only)." />
-
-  <style>
-    :root {
-      --bg: #020617;
-      --bg-card: #020617;
-      --bg-alt: #020617;
-      --border-subtle: #1e293b;
-      --accent: #3b82f6;
-      --accent-soft: #1d283a;
-      --text-main: #e5e7eb;
-      --text-muted: #9ca3af;
-      --danger: #f97373;
-      --font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
-
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      padding: 1.5rem;
-      background: radial-gradient(circle at top, #1e293b 0, #020617 50%, #000 100%);
-      color: var(--text-main);
-      font-family: var(--font);
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-    }
-
-    .app {
-      width: 100%;
-      max-width: 1100px;
-      border-radius: 1rem;
-      border: 1px solid var(--border-subtle);
-      background: radial-gradient(circle at top left, #0f172a 0, #020617 50%, #020617 100%);
-      padding: 1.5rem;
-      box-shadow: 0 18px 40px rgba(0,0,0,0.75);
-    }
-
-    header {
-      display: flex;
-      justify-content: space-between;
-      gap: 1rem;
-      margin-bottom: 1.25rem;
-      flex-wrap: wrap;
-      align-items: flex-start;
-    }
-
-    .title-block h1 {
-      margin: 0;
-      font-size: 1.7rem;
-      letter-spacing: 0.02em;
-    }
-
-    .subtitle {
-      margin-top: 0.25rem;
-      font-size: 0.9rem;
-      color: var(--text-muted);
-      max-width: 36rem;
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.25rem;
-      padding: 0.15rem 0.6rem;
-      border-radius: 999px;
-      border: 1px solid rgba(59,130,246,0.4);
-      background: rgba(37,99,235,0.1);
-      color: #bfdbfe;
-      font-size: 0.75rem;
-      margin-top: 0.35rem;
-    }
-
-    .header-links {
-      display: flex;
-      gap: 0.4rem;
-      align-items: center;
-    }
-
-    .header-links a {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 30px;
-      height: 30px;
-      border-radius: 999px;
-      border: 1px solid var(--border-subtle);
-      background: #020617;
-      color: var(--text-main);
-      text-decoration: none;
-    }
-
-    .header-links a:hover {
-      border-color: var(--accent);
-    }
-
-    .header-links svg {
-      width: 16px;
-      height: 16px;
-      fill: currentColor;
-    }
-
-    .input-card {
-      background: var(--bg-card);
-      border-radius: 0.75rem;
-      border: 1px solid var(--border-subtle);
-      padding: 1rem;
-      margin-bottom: 1rem;
-    }
-
-    label {
-      display: block;
-      font-size: 0.85rem;
-      margin-bottom: 0.35rem;
-      color: var(--text-muted);
-    }
-
-    .url-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-    }
-
-    #mcpUrl {
-      flex: 1;
-      min-width: 200px;
-      padding: 0.55rem 0.7rem;
-      border-radius: 0.5rem;
-      border: 1px solid var(--border-subtle);
-      background: #020617;
-      color: var(--text-main);
-      font-size: 0.9rem;
-    }
-
-    #mcpUrl::placeholder {
-      color: #475569;
-    }
-
-    button {
-      border-radius: 999px;
-      border: none;
-      padding: 0.55rem 1.1rem;
-      cursor: pointer;
-      background: var(--accent);
-      color: #e5e7eb;
-      font-size: 0.9rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-      white-space: nowrap;
-    }
-
-    button:hover {
-      background: #2563eb;
-    }
-
-    button:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    .copy-btn {
-      border-radius: 999px;
-      border: 1px solid var(--border-subtle);
-      background: #020617;
-      color: var(--text-main);
-      width: 26px;
-      height: 26px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0;
-      margin-left: 0.35rem;
-      cursor: pointer;
-    }
-
-    .copy-btn.small {
-      width: 22px;
-      height: 22px;
-    }
-
-    .copy-btn:hover {
-      border-color: var(--accent);
-    }
-
-    .copy-btn svg {
-      width: 13px;
-      height: 13px;
-      fill: currentColor;
-    }
-
-    .hint {
-      margin-top: 0.5rem;
-      font-size: 0.8rem;
-      color: var(--text-muted);
-    }
-
-    .hint code {
-      background: var(--accent-soft);
-      padding: 0.05rem 0.35rem;
-      border-radius: 999px;
-      font-size: 0.75rem;
-    }
-
-    .status {
-      margin-top: 0.6rem;
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      white-space: pre-wrap;
-    }
-
-    .status.error {
-      color: var(--danger);
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: minmax(0, 2.2fr) minmax(0, 2.3fr);
-      gap: 1rem;
-      margin-top: 0.75rem;
-    }
-
-    @media (max-width: 950px) {
-      .grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .section {
-      background: var(--bg-card);
-      border-radius: 0.75rem;
-      border: 1px solid var(--border-subtle);
-      padding: 0.9rem;
-      margin-bottom: 0.75rem;
-    }
-
-    .section h2 {
-      margin: 0 0 0.45rem 0;
-      font-size: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 0.35rem;
-    }
-
-    .section h2 span.dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 999px;
-      background: var(--accent);
-      display: inline-block;
-    }
-
-    .pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.25rem;
-      padding: 0.1rem 0.5rem;
-      border-radius: 999px;
-      background: var(--accent-soft);
-      color: var(--text-muted);
-      font-size: 0.75rem;
-      margin-bottom: 0.4rem;
-    }
-
-    .tool-card {
-      border-radius: 0.6rem;
-      border: 1px solid var(--border-subtle);
-      padding: 0.6rem 0.7rem;
-      margin-bottom: 0.6rem;
-      background: radial-gradient(circle at top left, rgba(37,99,235,0.18) 0, transparent 40%);
-    }
-
-    .tool-name {
-      font-size: 0.95rem;
-      font-weight: 600;
-      margin-bottom: 0.2rem;
-    }
-
-    .tool-desc {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      margin-bottom: 0.3rem;
-    }
-
-    details {
-      margin-top: 0.25rem;
-      font-size: 0.8rem;
-      color: var(--text-muted);
-    }
-
-    details summary {
-      cursor: pointer;
-      list-style: none;
-    }
-
-    details summary::-webkit-details-marker {
-      display: none;
-    }
-
-    details summary::before {
-      content: "▶ ";
-      font-size: 0.7rem;
-    }
-
-    details[open] summary::before {
-      content: "▼ ";
-    }
-
-    pre {
-      background: #020617;
-      padding: 0.5rem;
-      border-radius: 0.5rem;
-      overflow-x: auto;
-      font-size: 0.75rem;
-      line-height: 1.4;
-      border: 1px solid var(--border-subtle);
-      margin-top: 0.35rem;
-      color: #e5e7eb;
-    }
-
-    .raw-json {
-      max-height: 260px;
-      overflow: auto;
-    }
-
-    /* Chat card */
-    .chat-card small {
-      color: var(--text-muted);
-      display: block;
-      margin-bottom: 0.5rem;
-      font-size: 0.8rem;
-    }
-
-    .chat-layout {
-      display: flex;
-      flex-direction: column;
-      gap: 0.6rem;
-    }
-
-    .key-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      align-items: center;
-    }
-
-    #apiKeyInput {
-      flex: 1;
-      min-width: 200px;
-      padding: 0.45rem 0.7rem;
-      border-radius: 0.5rem;
-      border: 1px solid var(--border-subtle);
-      background: #020617;
-      color: var(--text-main);
-      font-size: 0.85rem;
-    }
-
-    #apiKeyInput::placeholder {
-      color: #475569;
-    }
-
-    .system-row {
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
-      margin-top: 0.5rem;
-      font-size: 0.8rem;
-      color: var(--text-muted);
-    }
-
-    #systemPromptInput {
-      width: 100%;
-      min-height: 90px;
-      max-height: 200px;
-      resize: vertical;
-      padding: 0.4rem 0.6rem;
-      border-radius: 0.5rem;
-      border: 1px solid var(--border-subtle);
-      background: #020617;
-      color: var(--text-main);
-      font-size: 0.8rem;
-      font-family: var(--font);
-    }
-
-    .chat-log {
-      border-radius: 0.6rem;
-      border: 1px solid var(--border-subtle);
-      background: #020617;
-      padding: 0.5rem;
-      max-height: 240px;
-      overflow-y: auto;
-      font-size: 0.85rem;
-    }
-
-    .chat-message {
-      margin-bottom: 0.35rem;
-      display: flex;
-    }
-
-    .chat-message.user {
-      justify-content: flex-end;
-    }
-
-    .chat-bubble {
-      max-width: 80%;
-      padding: 0.4rem 0.6rem;
-      border-radius: 0.75rem;
-      line-height: 1.4;
-      white-space: pre-wrap;
-    }
-
-    .chat-message.user .chat-bubble {
-      background: #1d4ed8;
-      color: #e5e7eb;
-      border-bottom-right-radius: 0.2rem;
-    }
-
-    .chat-message.assistant .chat-bubble {
-      background: #0f172a;
-      color: #e5e7eb;
-      border-bottom-left-radius: 0.2rem;
-    }
-
-    .chat-input-row {
-      display: flex;
-      gap: 0.5rem;
-      margin-top: 0.25rem;
-    }
-
-    #chatInput {
-      flex: 1;
-      min-height: 40px;
-      max-height: 80px;
-      resize: vertical;
-      padding: 0.4rem 0.6rem;
-      border-radius: 0.5rem;
-      border: 1px solid var(--border-subtle);
-      background: #020617;
-      color: #e5e7eb;
-      font-size: 0.85rem;
-      font-family: var(--font);
-    }
-
-    .gh-inline-link {
-      display: inline-flex;
-      align-items: center;
-      margin-left: 0.4rem;
-      text-decoration: none;
-      color: var(--accent);
-      font-size: 0.8rem;
-    }
-
-    .gh-inline-link svg {
-      width: 14px;
-      height: 14px;
-      fill: currentColor;
-      margin-left: 2px;
-    }
-
-    .prompt-examples {
-      margin-top: 0.35rem;
-      font-size: 0.8rem;
-      color: var(--text-muted);
-    }
-
-    .prompt-line {
-      display: flex;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 0.25rem;
-      margin-top: 0.15rem;
-    }
-
-    .prompt-label {
-      font-weight: 500;
-      color: #cbd5f5;
-      margin-right: 0.25rem;
-    }
-
-    footer {
-      margin-top: 1.25rem;
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      display: flex;
-      justify-content: space-between;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-    }
-
-    footer a {
-      color: var(--accent);
-      text-decoration: none;
-    }
-
-    footer a:hover {
-      text-decoration: underline;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="app">
@@ -718,6 +221,93 @@ Return ONLY valid JSON (no extra prose) using this shape:
   </div>
 
   <script>
+    function safeJsonParse(str) {
+      try {
+        return JSON.parse(str);
+      } catch {
+        return null;
+      }
+    }
+
+    function extractJsonFromText(text) {
+      if (!text) return null;
+
+      const direct = safeJsonParse(text);
+      if (direct) return direct;
+
+      const match = text.match(/```json\s*([\s\S]*?)```/i);
+      if (match && match[1]) {
+        const block = safeJsonParse(match[1].trim());
+        if (block) return block;
+      }
+
+      const match2 = text.match(/```[a-zA-Z0-9]*\s*([\s\S]*?)```/);
+      if (match2 && match2[1]) {
+        const block2 = safeJsonParse(match2[1].trim());
+        if (block2) return block2;
+      }
+
+      return null;
+    }
+
+    async function planToolCalls({ apiKey, model, systemPrompt, mcpBaseUrl, manifest, userText }) {
+      const planningMessages = [
+        { role: 'system', content: systemPrompt || '' },
+        {
+          role: 'system',
+          content:
+            'The MCP server base URL is: ' + mcpBaseUrl + '\n' +
+            'The client will call POST ' + mcpBaseUrl + '/mcp/tools/{toolName} with body { "args": { ... } }.'
+        },
+        { role: 'system', content: 'Here is the MCP manifest JSON:\n' + JSON.stringify(manifest, null, 2) },
+        { role: 'user', content: userText }
+      ];
+
+      const planResp = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + apiKey
+        },
+        body: JSON.stringify({
+          model: model || 'gpt-4.1-mini',
+          messages: planningMessages,
+          temperature: 0.1
+        })
+      });
+
+      if (!planResp.ok) {
+        const txt = await planResp.text().catch(() => '');
+        const err = new Error('OpenAI planning request failed');
+        err.status = planResp.status;
+        err.body = txt;
+        throw err;
+      }
+
+      const planData = await planResp.json();
+      const planText = planData.choices?.[0]?.message?.content || '';
+      const planJson = extractJsonFromText(planText) || {};
+
+      let calls = [];
+      if (Array.isArray(planJson.calls) && planJson.calls.length > 0) {
+        calls = planJson.calls;
+      } else if (planJson.tool) {
+        calls = [{ tool: planJson.tool, args: planJson.args || {} }];
+      }
+
+      if (!calls.length) {
+        const err = new Error('No tool calls found in OpenAI response');
+        err.status = planResp.status;
+        err.body = planText;
+        throw err;
+      }
+
+      return {
+        calls,
+        explanation: planJson.explanation || 'Executing planned MCP tool call(s).'
+      };
+    }
+
     const urlInput = document.getElementById('mcpUrl');
     const discoverBtn = document.getElementById('discoverBtn');
     const statusEl = document.getElementById('status');
@@ -784,7 +374,7 @@ Return ONLY valid JSON (no extra prose) using this shape:
 
         const name = document.createElement('div');
         name.className = 'tool-name';
-        name.textContent = tool.name || '(unnamed tool #' + (idx+1) + ')';
+        name.textContent = tool.name || '(unnamed tool #' + (idx + 1) + ')';
 
         const desc = document.createElement('div');
         desc.className = 'tool-desc';
@@ -894,7 +484,6 @@ Return ONLY valid JSON (no extra prose) using this shape:
         const data = await resp.json();
         lastManifest = data;
 
-        // derive base URL from manifest URL
         const parsed = new URL(url);
         mcpBaseUrl = parsed.origin;
 
@@ -933,7 +522,6 @@ Return ONLY valid JSON (no extra prose) using this shape:
       if (e.key === 'Enter') discover();
     });
 
-    // ---- Chat logic ----
     function renderChatLog() {
       chatLogEl.innerHTML = '';
       chatHistory.forEach(msg => {
@@ -949,36 +537,6 @@ Return ONLY valid JSON (no extra prose) using this shape:
       });
 
       chatLogEl.scrollTop = chatLogEl.scrollHeight;
-    }
-
-    function safeJsonParse(str) {
-      try {
-        return JSON.parse(str);
-      } catch {
-        return null;
-      }
-    }
-
-    function extractJsonFromText(text) {
-      // If it's already pure JSON, try that first
-      const direct = safeJsonParse(text);
-      if (direct) return direct;
-
-      // Try to find a ```json ``` block
-      const match = text.match(/```json\s*([\s\S]*?)```/i);
-      if (match && match[1]) {
-        const block = safeJsonParse(match[1].trim());
-        if (block) return block;
-      }
-
-      // Try any ``` ``` block
-      const match2 = text.match(/```[a-zA-Z0-9]*\s*([\s\S]*?)```/);
-      if (match2 && match2[1]) {
-        const block2 = safeJsonParse(match2[1].trim());
-        if (block2) return block2;
-      }
-
-      return null;
     }
 
     function setChatErrorWithBody(status, bodyText) {
@@ -1017,70 +575,17 @@ Return ONLY valid JSON (no extra prose) using this shape:
 
       try {
         const systemPromptText = systemPromptInput.value.trim() || '';
-
-        // Step 1: Ask OpenAI which tool(s) to call + args
-        const planningMessages = [
-          {
-            role: 'system',
-            content: systemPromptText
-          },
-          {
-            role: 'system',
-            content:
-              'The MCP server base URL is: ' + mcpBaseUrl + '\n' +
-              'The client will call POST ' + mcpBaseUrl + '/mcp/tools/{toolName} with body { "args": { ... } }.'
-          },
-          {
-            role: 'system',
-            content: 'Here is the MCP manifest JSON:\n' + JSON.stringify(lastManifest, null, 2)
-          },
-          {
-            role: 'user',
-            content: userText
-          }
-        ];
-
-        const planResp = await fetch('https://api.openai.com/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + apiKey
-          },
-          body: JSON.stringify({
-            model: modelSelect?.value || 'gpt-4.1-mini',
-            messages: planningMessages,
-            temperature: 0.1
-          })
+        const planResult = await planToolCalls({
+          apiKey,
+          model: modelSelect?.value || 'gpt-4.1-mini',
+          systemPrompt: systemPromptText,
+          mcpBaseUrl,
+          manifest: lastManifest,
+          userText
         });
 
-        if (!planResp.ok) {
-          const txt = await planResp.text().catch(() => '');
-          console.error('OpenAI planning error:', txt);
-          setChatErrorWithBody(planResp.status, txt);
-          sendChatBtn.disabled = false;
-          return;
-        }
+        const { calls, explanation } = planResult;
 
-        const planData = await planResp.json();
-        const planText = planData.choices?.[0]?.message?.content || '';
-        const planJson = extractJsonFromText(planText);
-
-        let calls = [];
-        if (planJson && Array.isArray(planJson.calls) && planJson.calls.length > 0) {
-          calls = planJson.calls;
-        } else if (planJson && planJson.tool) {
-          calls = [{ tool: planJson.tool, args: planJson.args || {} }];
-        }
-
-        if (!calls.length) {
-          setChatStatus('Could not find any calls in OpenAI response (expected "calls" array or "tool").', true);
-          sendChatBtn.disabled = false;
-          return;
-        }
-
-        const explanation = planJson.explanation || 'Executing planned MCP tool call(s).';
-
-        // Step 2: Call MCP tool HTTP endpoint(s)
         let resultsText = '';
         for (let i = 0; i < calls.length; i++) {
           const c = calls[i];
@@ -1137,7 +642,11 @@ Return ONLY valid JSON (no extra prose) using this shape:
 
       } catch (err) {
         console.error(err);
-        setChatStatus('Error while planning or calling MCP tool(s): ' + err.message, true);
+        if (err && err.status) {
+          setChatErrorWithBody(err.status, err.body);
+        } else {
+          setChatStatus('Error while planning or calling MCP tool(s): ' + err.message, true);
+        }
       } finally {
         sendChatBtn.disabled = false;
       }
@@ -1174,7 +683,6 @@ Return ONLY valid JSON (no extra prose) using this shape:
       });
     }
 
-    // Initialize copy buttons on load
     initCopyButtons();
   </script>
 </body>
